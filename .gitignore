@@ -1,0 +1,14 @@
+# Executables
+*.exe
+*.o
+*.dll
+
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
