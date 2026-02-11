@@ -9,6 +9,7 @@ void DrawCharges();
 void ComputeForces();
 void ResetForces();
 void UpdateCharges(float);
+void HandleInput(void);
 
 #define WIDTH 900
 #define HEIGHT 600
@@ -25,6 +26,10 @@ void UpdateCharges(float);
 #define RADIUS 7
 
 #define EPS0 8.8541878176E-12
+
+static bool DRAW_VELOCITY = false;
+static bool DRAW_INDIVIDUAL_FORCES = false;
+static bool DRAW_OVERALL_FORCES = false;
 
 typedef struct {
     float x, y, r, vx, vy, fx, fy;
@@ -50,6 +55,7 @@ int main(void) {
     while(!WindowShouldClose()) {
         BeginDrawing();
             ClearBackground(BLACK);
+            HandleInput();
             ResetForces();
             ComputeForces();
             UpdateCharges(GetFrameTime());
@@ -109,8 +115,24 @@ void ComputeForces(void) {
             c1->fy += f1y;
             c2->fx -= f1x;
             c2->fy -= f1y;
+
+            // DRAW
+            if (DRAW_INDIVIDUAL_FORCES) {
+                DrawLine(c1->x, c1->y, c1->x + f1x, c1->y + f1y, (Color){255, 255, 255, 255});
+                DrawLine(c2->x, c2->y, c2->x - f1x, c2->y - f1y, (Color){255, 255, 255, 255});
+            }
         }
     }
+}
+
+void HandleInput(void)
+{
+    if (IsKeyPressed(KEY_V))
+        DRAW_VELOCITY = !DRAW_VELOCITY;
+    if (IsKeyPressed(KEY_F))
+        DRAW_INDIVIDUAL_FORCES = !DRAW_INDIVIDUAL_FORCES;
+    if (IsKeyPressed(KEY_G))
+        DRAW_OVERALL_FORCES = !DRAW_OVERALL_FORCES;
 }
 
 void ResetForces() {
@@ -130,9 +152,14 @@ void DrawCharges(void) {
                 c->r,
                 c->charge == 1 ? POSITIVE_PARTICLE_COLOR : NEGATIVE_PARTICLE_COLOR);
         float v = sqrtf(c->vx*c->vx + c->vy*c->vy);
-        //DrawText(TextFormat("%.02f", v), c->x + 20, c->y + 20, 10, WHITE);
-        //char x = (int)((c->vx + c->vy) * 1000) % 255;
-        //DrawLine(c->x, c->y, c->x + c->vx, c->y + c->vy, (Color){x, 255, 255, 255});
+        if (DRAW_VELOCITY)
+        {    DrawText(TextFormat("%.02f", v), c->x + 20, c->y + 20, 10, WHITE);
+            char x = (int)((c->vx + c->vy) * 1000) % 255;
+            DrawLine(c->x, c->y, c->x + c->vx, c->y + c->vy, (Color){x, 255, 255, 255});
+        }
+        if (DRAW_OVERALL_FORCES) {
+            DrawLine(c->x, c->y, c->x + c->fx, c->y + c->fy, (Color){255, 255, 255, 255});
+        }
     }
 }
 
